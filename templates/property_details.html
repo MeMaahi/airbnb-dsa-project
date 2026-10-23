@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ property.Property_Name }} | Stay Finder</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/details.css') }}">
+</head>
+<body>
+  <header class="topbar details-topbar">
+    <a class="brand" href="/"><span class="brand-mark">⌂</span><span>Stay Finder</span></a>
+    <nav class="details-nav">
+      {% if current_user.is_authenticated %}
+        <span>Hi, {{ current_user.full_name }}</span>
+        <a class="account-link" href="{{ url_for('logout') }}">Log out</a>
+      {% else %}
+        <a class="account-link" href="{{ url_for('login') }}">Log in</a>
+        <a class="account-link signup-link" href="{{ url_for('signup') }}">Sign up</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="details-container">
+    <a class="back-home" href="/">← Explore all stays</a>
+
+    <div class="details-heading">
+      <div>
+        <h1>{{ property.Property_Name }}</h1>
+        <p>★ {{ property.Rating }} · {{ property.Location }}</p>
+      </div>
+      <span class="category-pill">{{ property.Category or "Accommodation" }}</span>
+    </div>
+
+    <div class="details-photo-wrap">
+      <img class="details-photo"
+           src="{{ property.Image_URL }}"
+           alt="{{ property.Property_Name }}"
+           onerror="this.style.display='none'; document.getElementById('imageFallback').style.display='grid';">
+      <div id="imageFallback" class="image-fallback">
+        <span>🏡</span>
+        <p>Photo currently unavailable</p>
+      </div>
+    </div>
+
+    <div class="details-layout">
+      <section class="details-description">
+        <h2>About this stay</h2>
+        <p>{{ property.Description or "A comfortable place for your next stay." }}</p>
+
+        <div class="details-feature">
+          <span>📍</span>
+          <div>
+            <strong>Location</strong>
+            <p>{{ property.Location }}</p>
+          </div>
+        </div>
+
+        <div class="details-feature">
+          <span>⭐</span>
+          <div>
+            <strong>Guest rating</strong>
+            <p>{{ property.Rating }} out of 5</p>
+          </div>
+        </div>
+
+        <div class="details-feature">
+          <span>🏠</span>
+          <div>
+            <strong>Stay type</strong>
+            <p>{{ property.Category or "Accommodation" }}</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="details-booking-card">
+        <p class="details-price">
+          <strong>₹{{ property.Price }}</strong>
+          <span>per night</span>
+        </p>
+
+        {% if current_user.is_authenticated %}
+          <form id="detailsBookingForm">
+            <input type="hidden" id="propertyId"
+                   value="{{ property.Property_ID }}">
+
+            <label for="checkIn">Check-in</label>
+            <input id="checkIn" type="date" required>
+
+            <label for="checkOut">Check-out</label>
+            <input id="checkOut" type="date" required>
+
+            <label for="guests">Guests</label>
+            <select id="guests">
+              {% for n in range(1, 7) %}
+                <option value="{{ n }}" {% if n == 2 %}selected{% endif %}>
+                  {{ n }} guest{% if n != 1 %}s{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+
+            <button class="details-book-button" type="submit">
+              Request to book
+            </button>
+            <p id="detailsBookingMessage" class="booking-feedback"></p>
+          </form>
+        {% else %}
+          <p>Log in to submit a booking request for this stay.</p>
+          <a class="details-book-button" href="{{ url_for('login') }}">
+            Log in to book
+          </a>
+          <p class="details-signup-note">
+            New here? <a href="{{ url_for('signup') }}">Create an account</a>
+          </p>
+        {% endif %}
+      </aside>
+    </div>
+  </main>
+
+  {% if current_user.is_authenticated %}
+  <script>
+    const detailsForm = document.getElementById("detailsBookingForm");
+    const feedback = document.getElementById("detailsBookingMessage");
+
+    detailsForm.addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const checkIn = document.getElementById("checkIn").value;
+      const checkOut = document.getElementById("checkOut").value;
+
+      if (!checkIn || !checkOut || checkOut <= checkIn) {
+        feedback.textContent = "Please choose valid check-in and check-out dates.";
+        feedback.className = "booking-feedback error";
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/bookings", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            property_id: document.getElementById("propertyId").value,
+            check_in: checkIn,
+            check_out: checkOut,
+            guests: document.getElementById("guests").value
+          })
+        });
+
+        const result = await response.json();
+        feedback.textContent = result.message;
+        feedback.className = response.ok
+          ? "booking-feedback success"
+          : "booking-feedback error";
+
+        if (response.ok) detailsForm.reset();
+      } catch (error) {
+        feedback.textContent = "Unable to submit the request. Please try again.";
+        feedback.className = "booking-feedback error";
+      }
+    });
+  </script>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,314 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+
+  <title>airbnb | Find your place</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+  >
+</head>
+
+<body
+  data-logged-in="{{ current_user.is_authenticated | tojson }}"
+  data-user-name="{{ (current_user.full_name if current_user.is_authenticated else '') | e }}"
+>
+  <!-- Navigation -->
+  <header class="topbar">
+
+    <a class="brand" href="/">
+      <span class="brand-mark">⌂</span>
+      <span>airbnb</span>
+    </a>
+
+    <nav class="category-nav" aria-label="Stay categories">
+      <button type="button" class="nav-category active" data-category="All">
+        <span>🌍</span> All
+      </button>
+
+      <button type="button" class="nav-category" data-category="Apartment">
+        <span>🏡</span> Homes
+      </button>
+
+      <button type="button" class="nav-category" data-category="Beach">
+        <span>🎈</span> Beach
+      </button>
+
+      <button type="button" class="nav-category" data-category="Hill">
+        <span>🏔️</span> Cabins &amp; hills
+      </button>
+
+      <button type="button" class="nav-category" data-category="City">
+        <span>🏙️</span> City stays
+      </button>
+
+      <button type="button" class="nav-category" data-category="Lake">
+        <span>🌅</span> Lake homes
+      </button>
+    </nav>
+
+    <div class="host-area">
+      {% if current_user.is_authenticated %}
+        <span>Hi, {{ current_user.full_name }}</span>
+        <a class="account-link" href="{{ url_for('logout') }}">Log out</a>
+      {% else %}
+        <a class="account-link" href="{{ url_for('login') }}">Log in</a>
+        <a class="account-link signup-link" href="{{ url_for('signup') }}">Sign up</a>
+      {% endif %}
+
+      <button type="button" class="menu-btn" aria-label="Menu">☰</button>
+    </div>
+
+  </header>
+
+  <!-- Search -->
+  <section class="search-wrap">
+    <form id="searchForm" class="searchbar">
+
+      <label class="search-field">
+        <span>Where</span>
+        <input
+          id="locationInput"
+          name="location"
+          type="text"
+          placeholder="Search destinations"
+          autocomplete="off"
+        >
+      </label>
+
+      <label class="search-field">
+        <span>When</span>
+        <input id="checkIn" type="date" aria-label="Check in">
+      </label>
+
+      <label class="search-field">
+        <span>Who</span>
+        <select id="guests" aria-label="Number of guests">
+          <option value="1">1 guest</option>
+          <option value="2" selected>2 guests</option>
+          <option value="3">3 guests</option>
+          <option value="4">4 guests</option>
+          <option value="5">5 guests</option>
+          <option value="6">6 guests</option>
+        </select>
+      </label>
+
+      <button class="search-button" type="submit" aria-label="Search">
+        ⌕
+      </button>
+
+    </form>
+  </section>
+
+  <!-- Main content -->
+  <main class="page-content">
+
+    <!-- Property listings -->
+    <section class="listing-section">
+
+      <div class="section-heading">
+        <div>
+          <h1>
+            Available stays for your next getaway
+            <span class="round-arrow">→</span>
+          </h1>
+          <p>Find a place that feels like yours.</p>
+        </div>
+
+        <div class="slider-controls">
+          <button type="button" id="scrollLeft" aria-label="Scroll left">
+            ‹
+          </button>
+          <button type="button" id="scrollRight" aria-label="Scroll right">
+            ›
+          </button>
+        </div>
+      </div>
+
+      <div id="propertyGrid" class="property-grid"></div>
+
+      <div id="emptyState" class="empty-state hidden">
+        No stays match your search. Try another destination.
+      </div>
+
+    </section>
+
+    <!-- DSA demonstration -->
+    <section class="dsa-panel">
+
+      <div class="dsa-copy">
+        <span class="eyebrow">BEHIND THE EXPERIENCE</span>
+
+        <h2>Smart stays, powered by data structures.</h2>
+
+        <p>
+          This student project demonstrates property searching,
+          price sorting, location traversal and budget-based
+          selection using core DSA concepts.
+        </p>
+      </div>
+
+      <div class="dsa-controls">
+
+        <label for="budgetInput">
+          Budget (₹)
+          <input
+            type="number"
+            id="budgetInput"
+            min="1"
+            value="3000"
+          >
+        </label>
+
+        <label for="startLocation">
+          Start location
+          <select id="startLocation">
+            <option>Bangalore</option>
+            <option>Chennai</option>
+            <option>Coorg</option>
+            <option>Mysore</option>
+            <option>Hyderabad</option>
+          </select>
+        </label>
+
+        <button type="button" id="runDsa" class="dark-button">
+          Run DSA demo
+        </button>
+
+      </div>
+
+      <div id="dsaResults" class="dsa-results">
+        <p>Choose a budget and location, then run the DSA demo.</p>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <a class="brand footer-brand" href="/">
+        <span class="brand-mark">⌂</span>
+        <span>airbnb</span>
+      </a>
+
+      <span>Mini project · Python + Flask · HTML · CSS · JavaScript</span>
+      <span>Built for learning and demonstration</span>
+    </footer>
+
+  </main>
+
+  <!-- Booking modal -->
+  <div class="modal-backdrop hidden" id="bookingModal">
+
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        id="closeModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div id="modalImage" class="modal-image"></div>
+
+      <span class="eyebrow">YOUR NEXT GETAWAY</span>
+
+      <h2 id="modalTitle">Book your stay</h2>
+      <p id="modalDescription"></p>
+
+      <form id="bookingForm">
+
+        <input type="hidden" id="bookingPropertyId" name="property_id">
+
+        <label for="customerName">
+          Your name
+          <input
+            id="customerName"
+            name="customer_name"
+            type="text"
+            required
+            placeholder="Enter your name"
+            autocomplete="name"
+          >
+        </label>
+
+        <div class="form-row">
+
+          <label for="bookingCheckIn">
+            Check-in
+            <input
+              id="bookingCheckIn"
+              name="check_in"
+              type="date"
+              required
+            >
+          </label>
+
+          <label for="bookingCheckOut">
+            Check-out
+            <input
+              id="bookingCheckOut"
+              name="check_out"
+              type="date"
+              required
+            >
+          </label>
+
+        </div>
+
+        <label for="bookingGuests">
+          Guests
+          <select id="bookingGuests" name="guests">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </label>
+
+        <button class="primary-button" type="submit">
+          Request to book
+        </button>
+
+        <p id="bookingMessage" class="form-message" role="status"></p>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Expose Flask authentication state to JavaScript -->
+  <script>
+    window.APP_IS_LOGGED_IN =
+      document.body.dataset.loggedIn === "true";
+
+    window.APP_USER_NAME =
+      document.body.dataset.userName || "";
+  </script>
+
+  <!-- Main application JavaScript -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>

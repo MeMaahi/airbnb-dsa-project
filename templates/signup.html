@@ -1,0 +1,115 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff8f6">
+
+  <title>Sign Up | Airbnb Stay Finder</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+
+<body class="auth-page">
+  <main class="auth-layout">
+
+    <section class="auth-visual">
+      <a href="/" class="auth-brand">⌂ airbnb</a>
+
+      <div>
+        <h1>Find your place in the world.</h1>
+        <p>
+          Create your account to discover comfortable stays,
+          explore exciting destinations, and plan your next getaway.
+        </p>
+      </div>
+    </section>
+
+    <section class="auth-form-side">
+      <div class="auth-card">
+
+        <h2>Create your account</h2>
+        <p class="auth-subtitle">
+          Find a place that feels like yours.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="auth-error" role="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form class="auth-form"
+              method="POST"
+              action="{{ url_for('signup') }}">
+
+          <label for="full_name">
+            Full name
+            <input
+              id="full_name"
+              name="full_name"
+              type="text"
+              placeholder="Enter your full name"
+              autocomplete="name"
+              minlength="2"
+              required
+            >
+          </label>
+
+          <label for="email">
+            Email address
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+          </label>
+
+          <label for="password">
+            Password
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="At least 8 characters"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            >
+          </label>
+
+          <button class="auth-submit" type="submit">
+            Create account
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          Already have an account?
+          <a href="{{ url_for('login') }}">Log in</a>
+        </p>
+
+        <a class="auth-home" href="/">← Back to home</a>
+
+      </div>
+    </section>
+
+  </main>
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>
