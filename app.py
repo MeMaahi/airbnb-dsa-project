@@ -23,7 +23,7 @@ login_manager.login_view = "login"
 DB_CONFIG = {
     "host": os.getenv("AIRBNB_DB_HOST", "localhost"),
     "user": os.getenv("AIRBNB_DB_USER", "root"),
-    "password": os.getenv("AIRBNB_DB_PASSWORD", "ADBMS@2026"),
+    "password": os.getenv("AIRBNB_DB_PASSWORD", ""),
     "database": os.getenv("AIRBNB_DB_NAME", "airbnb_clone"),
     "port": int(os.getenv("AIRBNB_DB_PORT", "3306")),
 }
